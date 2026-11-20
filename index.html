@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lip Balm Quiz</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:560px;margin:2rem auto;padding:0 16px;color:#222}
+button{display:block;width:100%;margin:8px 0;padding:14px;font-size:1rem;border:1px solid #ccc;border-radius:10px;background:#fff;cursor:pointer;text-align:left}
+button:hover{border-color:#e0457b}
+.card{border:1px solid #eee;border-radius:12px;padding:16px;margin:12px 0}
+.bar{height:6px;background:#eee;border-radius:3px}.bar i{display:block;height:6px;background:#e0457b;border-radius:3px}
+a.cta{display:inline-block;margin-top:8px;padding:10px 16px;background:#e0457b;color:#fff;border-radius:8px;text-decoration:none}
+</style></head><body>
+<h1>Find your Meltie</h1><div id="app"></div>
+
+<!-- Questions: each answer adds +1 to every product tag it lists. Edit freely. -->
+<script id="questions" type="application/json">
+[
+ {"q":"What's your main lip concern?","a":[
+  {"t":"Dry & chapped","tags":["hydrating","repair"]},
+  {"t":"Dull / dark lips","tags":["brightening"]},
+  {"t":"Sun exposure","tags":["spf"]},
+  {"t":"Just want colour","tags":["tint"]}]},
+ {"q":"Want a hint of colour?","a":[
+  {"t":"Yes, tinted","tags":["tint"]},
+  {"t":"No, clear please","tags":["clear"]}]},
+ {"q":"Do you need SPF?","a":[
+  {"t":"Yes, daily protection","tags":["spf"]},
+  {"t":"Not necessary","tags":["hydrating"]}]},
+ {"q":"Pick a flavour vibe","a":[
+  {"t":"Fruity","tags":["fruity"]},
+  {"t":"Sweet / dessert","tags":["sweet"]},
+  {"t":"Fresh / minty","tags":["fresh"]}]}
+]
+</script>
+
+<!-- Products: PLACEHOLDERS. dotandkey.com returned 429 to automated clients, so replace
+     with real data from /collections/lip-balms/products.json (title, url, image). -->
+<script id="products" type="application/json">
+[
+ {"name":"Meltie Lip Balm – Strawberry (placeholder)","url":"https://www.dotandkey.com/collections/lip-balms","image":"","tags":["hydrating","tint","fruity","repair"]},
+ {"name":"Meltie Lip Balm – Vanilla (placeholder)","url":"https://www.dotandkey.com/collections/lip-balms","image":"","tags":["hydrating","clear","sweet","repair"]},
+ {"name":"Meltie Lip Balm SPF (placeholder)","url":"https://www.dotandkey.com/collections/lip-balms","image":"","tags":["spf","clear","fresh","hydrating"]},
+ {"name":"Meltie Tinted Lip Balm (placeholder)","url":"https://www.dotandkey.com/collections/lip-balms","image":"","tags":["tint","brightening","sweet","fruity"]}
+]
+</script>
+
+<script>
+const Q=JSON.parse(document.getElementById('questions').textContent),
+      P=JSON.parse(document.getElementById('products').textContent),
+      app=document.getElementById('app'),score={};
+let i=0;
+function show(){
+  if(i>=Q.length) return result();
+  const q=Q[i];
+  app.innerHTML=`<div class="bar"><i style="width:${i/Q.length*100}%"></i></div><h2>${q.q}</h2>`;
+  q.a.forEach(a=>{const b=document.createElement('button');b.textContent=a.t;
+    b.onclick=()=>{a.tags.forEach(t=>score[t]=(score[t]||0)+1);i++;show()};app.appendChild(b)});
+}
+function result(){
+  const r=P.map(p=>({...p,s:p.tags.reduce((n,t)=>n+(score[t]||0),0)})).sort((a,b)=>b.s-a.s);
+  app.innerHTML='<h2>Your match</h2>'+r.map((p,k)=>`<div class="card"><b>${k?'':'★ Best: '}${p.name}</b>
+    ${p.image?`<br><img src="${p.image}" width="120">`:''}<br><a class="cta" href="${p.url}" target="_blank" rel="noopener">Shop</a></div>`).join('')+
+    '<button onclick="location.reload()">Retake</button>';
+}
+show();
+</script></body></html>
